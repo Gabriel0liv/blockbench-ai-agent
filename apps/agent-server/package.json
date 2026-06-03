@@ -1,0 +1,21 @@
+{
+  "name": "@blockbench-ai-agent/agent-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@blockbench-ai-agent/shared": "workspace:*",
+    "@fastify/cors": "^9.0.1",
+    "fastify": "^4.26.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.2",
+    "typescript": "^5.4.5"
+  }
+}
