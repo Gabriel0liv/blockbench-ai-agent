@@ -1,6 +1,25 @@
 import { AICommand } from '@blockbench-ai-agent/shared';
 
 /**
+ * Gets or creates the fallback group 'ai_generated' under the root.
+ */
+function getOrCreateFallbackGroup(): any {
+  if (typeof Group === 'undefined' || !Array.isArray(Group.all)) {
+    return undefined;
+  }
+  
+  let fallback = Group.all.find((g: any) => g.name === 'ai_generated');
+  if (!fallback) {
+    fallback = new Group({ name: 'ai_generated' });
+    fallback.addTo();
+    if (typeof fallback.init === 'function') {
+      fallback.init();
+    }
+  }
+  return fallback;
+}
+
+/**
  * Executes a list of AI commands on the current Blockbench project.
  * Uses isolated global Canvas, Group, Cube, and other APIs.
  */
@@ -17,14 +36,26 @@ export function applyCommands(commands: AICommand[]) {
           continue;
         }
         
-        const group = new Group({ name: cmd.name });
-        
         let parentGroup: any = undefined;
-        if (cmd.parent && Array.isArray(Group.all)) {
-          parentGroup = Group.all.find((g: any) => g.name === cmd.parent);
+        if (cmd.parent) {
+          if (Array.isArray(Group.all)) {
+            parentGroup = Group.all.find((g: any) => g.name === cmd.parent);
+          }
+          if (!parentGroup) {
+            throw new Error(`Parent group "${cmd.parent}" specified for group "${cmd.name}" but not found in the project.`);
+          }
+        } else {
+          // Commands without parent use the fallback group 'ai_generated'
+          parentGroup = getOrCreateFallbackGroup();
         }
         
+        const group = new Group({ name: cmd.name });
         group.addTo(parentGroup);
+        
+        if (typeof group.init === 'function') {
+          group.init();
+        }
+        
         alteredElements.push(group);
       }
       
@@ -34,6 +65,19 @@ export function applyCommands(commands: AICommand[]) {
           continue;
         }
         
+        let parentGroup: any = undefined;
+        if (cmd.parent) {
+          if (typeof Group !== 'undefined' && Array.isArray(Group.all)) {
+            parentGroup = Group.all.find((g: any) => g.name === cmd.parent);
+          }
+          if (!parentGroup) {
+            throw new Error(`Parent group "${cmd.parent}" specified for cube "${cmd.name}" but not found in the project.`);
+          }
+        } else {
+          // Commands without parent use the fallback group 'ai_generated'
+          parentGroup = getOrCreateFallbackGroup();
+        }
+
         const cubeData: any = {
           name: cmd.name,
           from: cmd.from,
@@ -46,12 +90,6 @@ export function applyCommands(commands: AICommand[]) {
         }
         
         const cube = new Cube(cubeData);
-        
-        let parentGroup: any = undefined;
-        if (cmd.parent && typeof Group !== 'undefined' && Array.isArray(Group.all)) {
-          parentGroup = Group.all.find((g: any) => g.name === cmd.parent);
-        }
-        
         cube.addTo(parentGroup);
         
         if (typeof cube.init === 'function') {
@@ -69,8 +107,7 @@ export function applyCommands(commands: AICommand[]) {
         
         const parentGroup = Group.all.find((g: any) => g.name === cmd.parent);
         if (!parentGroup) {
-          console.warn(`Parent group "${cmd.parent}" not found for move_to_group.`);
-          continue;
+          throw new Error(`Parent group "${cmd.parent}" specified for move_to_group but not found in the project.`);
         }
         
         let targetElement: any = undefined;
@@ -112,7 +149,11 @@ export function applyCommands(commands: AICommand[]) {
       if (alteredElements.length > 0 && typeof Canvas.updateView === 'function') {
         console.log(`Updating viewport view for ${alteredElements.length} items.`);
         try {
-          Canvas.updateView(alteredElements);
+          Canvas.updateView({
+            elements: alteredElements,
+            element_aspects: { geometry: true },
+            selection: true
+          });
         } catch (viewErr) {
           console.warn('Canvas.updateView failed, falling back to Canvas.updateAll:', viewErr);
           if (typeof Canvas.updateAll === 'function') {
@@ -129,5 +170,7 @@ export function applyCommands(commands: AICommand[]) {
     if (typeof Canvas !== 'undefined' && typeof Canvas.updateAll === 'function') {
       Canvas.updateAll();
     }
+    // Re-throw to propagate the error back to the UI panel status
+    throw err;
   }
 }

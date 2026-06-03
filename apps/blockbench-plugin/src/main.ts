@@ -4,13 +4,13 @@ import { createChatPanel, registerPanelEvents, unregisterPanelEvents } from './u
   let panelInstance: any = null;
 
   if (typeof Plugin !== 'undefined') {
-    Plugin.register('blockbench-ai-agent', {
+    Plugin.register('ai_model_agent', {
       title: 'AI Model Agent',
       author: 'Antigravity & Gabriel',
       icon: 'smart_toy',
       description: 'Control your Blockbench projects using local AI agent commands.',
       version: '1.0.0',
-      variant: 'both',
+      variant: 'desktop',
       onload() {
         console.log('AI Model Agent plugin loaded successfully.');
         
