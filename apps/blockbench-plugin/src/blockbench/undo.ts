@@ -23,6 +23,16 @@ export function runInUndoTransaction(actionName: string, runFn: () => void) {
     Undo.finishEdit(actionName);
   } catch (err) {
     console.error('Error in Blockbench Undo transaction wrapper:', err);
+
+    if (typeof Undo !== 'undefined' && typeof Undo.cancelEdit === 'function') {
+      try {
+        Undo.cancelEdit();
+      } catch (cancelErr) {
+        console.warn('Failed to cancel Blockbench Undo edit:', cancelErr);
+      }
+    }
+
+    throw err;
   }
 }
 
