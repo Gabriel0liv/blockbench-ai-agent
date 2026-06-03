@@ -4,6 +4,20 @@ import { runInUndoTransaction, triggerUndo } from '../blockbench/undo.js';
 
 let clickListener: ((event: MouseEvent) => void) | null = null;
 
+// Add UI panel translations for header labels
+if (typeof Blockbench !== 'undefined' && typeof Blockbench.addTranslations === 'function') {
+  try {
+    Blockbench.addTranslations('en', {
+      'panel.ai_model_agent': 'AI Model Agent'
+    });
+    Blockbench.addTranslations('pt', {
+      'panel.ai_model_agent': 'AI Model Agent'
+    });
+  } catch (err) {
+    console.warn('Blockbench.addTranslations failed:', err);
+  }
+}
+
 /**
  * Creates the sidebar chat panel for the AI Model Agent.
  */
@@ -14,27 +28,28 @@ export function createChatPanel() {
   }
 
   const panel = new Panel('ai_model_agent', {
-    title: 'AI Model Agent',
     icon: 'smart_toy',
     growable: true,
-    template: `
-      <div style="display: flex; flex-direction: column; height: 100%; padding: 8px; gap: 8px; box-sizing: border-box;">
-        <div id="ai-chat-history" style="flex: 1; min-height: 150px; border: 1px solid var(--color-border); background-color: var(--color-back); overflow-y: auto; padding: 6px; font-size: 13px; font-family: monospace; white-space: pre-wrap; display: flex; flex-direction: column; gap: 4px;">
-          <div style="color: var(--color-sub); font-style: italic;">[System] Panel loaded. Server: http://127.0.0.1:3000</div>
+    component: {
+      template: `
+        <div style="display: flex; flex-direction: column; height: 100%; padding: 8px; gap: 8px; box-sizing: border-box;">
+          <div id="ai-chat-history" style="flex: 1; min-height: 150px; border: 1px solid var(--color-border); background-color: var(--color-back); overflow-y: auto; padding: 6px; font-size: 13px; font-family: monospace; white-space: pre-wrap; display: flex; flex-direction: column; gap: 4px;">
+            <div style="color: var(--color-sub); font-style: italic;">[System] Panel loaded. Server: http://127.0.0.1:3000</div>
+          </div>
+          
+          <div style="font-size: 12px; display: flex; justify-content: space-between;">
+            <span><strong>Status:</strong> <span id="ai-agent-status" style="color: var(--color-accent); font-weight: bold;">Idle</span></span>
+          </div>
+          
+          <textarea id="ai-prompt-input" placeholder="Ex: cria dois chifres pequenos no grupo selecionado" style="width: 100%; height: 60px; box-sizing: border-box; background: var(--color-input); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 4px; padding: 6px; resize: none; font-size: 13px; font-family: sans-serif;"></textarea>
+          
+          <div style="display: flex; gap: 8px;">
+            <button id="ai-send-btn" class="button" style="flex: 2; height: 32px; font-weight: bold; background: var(--color-accent); color: var(--color-accent_text); cursor: pointer; border: none; border-radius: 4px;">Send Prompt</button>
+            <button id="ai-undo-btn" class="button" style="flex: 1; height: 32px; background: var(--color-button); color: var(--color-text); cursor: pointer; border: none; border-radius: 4px;">Undo AI</button>
+          </div>
         </div>
-        
-        <div style="font-size: 12px; display: flex; justify-content: space-between;">
-          <span><strong>Status:</strong> <span id="ai-agent-status" style="color: var(--color-accent); font-weight: bold;">Idle</span></span>
-        </div>
-        
-        <textarea id="ai-prompt-input" placeholder="Ex: cria dois chifres pequenos no grupo selecionado" style="width: 100%; height: 60px; box-sizing: border-box; background: var(--color-input); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 4px; padding: 6px; resize: none; font-size: 13px; font-family: sans-serif;"></textarea>
-        
-        <div style="display: flex; gap: 8px;">
-          <button id="ai-send-btn" class="button" style="flex: 2; height: 32px; font-weight: bold; background: var(--color-accent); color: var(--color-accent_text); cursor: pointer; border: none; border-radius: 4px;">Send Prompt</button>
-          <button id="ai-undo-btn" class="button" style="flex: 1; height: 32px; background: var(--color-button); color: var(--color-text); cursor: pointer; border: none; border-radius: 4px;">Undo AI</button>
-        </div>
-      </div>
-    `
+      `
+    }
   });
 
   return panel;
