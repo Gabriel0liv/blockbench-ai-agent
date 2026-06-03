@@ -8,7 +8,7 @@ This project is a monorepo managed with **pnpm workspaces**:
 
 - `packages/shared`: Shared TypeScript types, Zod validation schemas for AI commands, and structures.
 - `apps/agent-server`: A Fastify local HTTP server that exposes a `/agent/run` endpoint to validate, parse, and mock AI-generated model commands.
-- `apps/blockbench-plugin`: The Blockbench plugin interface, bundled to standard JavaScript via `tsup`, containing the sidebar Chat panel and the isolated commands driver.
+- `apps/blockbench-plugin`: The Blockbench plugin interface, bundled to standard JavaScript via `tsup`, containing the Tools action loader and the isolated commands driver.
 
 ## Prerequisites
 
@@ -66,6 +66,7 @@ The following commands are fully implemented in the current MVP 1:
 2. Go to **File** > **Plugins...**
 3. Click the three dots icon (`...`) at the top right, then select **Load Plugin from File**.
 4. Browse to `<project-root>/apps/blockbench-plugin/dist/ai_model_agent.js` and select it.
-5. The panel **AI Model Agent** will appear on the right sidebar.
-6. Select an active group in your outliner, type: *"cria dois chifres pequenos no grupo selecionado"*, and click **Send Prompt**.
-7. Two unique cubes will be added in a new nested group. Press `Ctrl + Z` or click **Undo AI** to undo the entire operation.
+5. A new option will appear under **Tools** > **AI Model Agent**. Click it to open the prompt dialog.
+6. Select an active group in your outliner, type: *"cria dois chifres pequenos no grupo selecionado"*, and click **Run**.
+7. Two unique cubes will be added in a new nested group. Press `Ctrl + Z` or click **Undo AI** to undo the operation.
+

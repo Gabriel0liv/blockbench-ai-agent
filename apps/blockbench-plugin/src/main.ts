@@ -1,7 +1,7 @@
-import { createChatPanel, registerPanelEvents, unregisterPanelEvents } from './ui/chatPanel.js';
+import { openAgentDialog } from './ui/agentDialog.js';
 
 (function() {
-  let panelInstance: any = null;
+  let openAgentAction: any = null;
 
   if (typeof Plugin !== 'undefined') {
     Plugin.register('ai_model_agent', {
@@ -14,26 +14,31 @@ import { createChatPanel, registerPanelEvents, unregisterPanelEvents } from './u
       onload() {
         console.log('AI Model Agent plugin loaded successfully.');
         
-        // Instantiate and register the sidebar panel
-        panelInstance = createChatPanel();
-        if (panelInstance && typeof panelInstance.register === 'function') {
-          panelInstance.register();
+        // Define Action to open the agent dialog modal
+        openAgentAction = new Action('open_ai_model_agent', {
+          name: 'AI Model Agent',
+          description: 'Open the AI Model Agent prompt window',
+          icon: 'smart_toy',
+          click() {
+            openAgentDialog();
+          }
+        });
+
+        // Add action to the Tools menu
+        if (typeof MenuBar !== 'undefined' && MenuBar.menus && MenuBar.menus.tools) {
+          MenuBar.menus.tools.addAction(openAgentAction);
         }
-        
-        // Attach DOM listeners for user interaction
-        registerPanelEvents();
       },
       onunload() {
         console.log('AI Model Agent plugin unloaded.');
         
-        // Dismount sidebar panel
-        if (panelInstance && typeof panelInstance.unregister === 'function') {
-          panelInstance.unregister();
-          panelInstance = null;
+        // Remove Action from Tools menu and release references
+        if (openAgentAction) {
+          if (typeof openAgentAction.delete === 'function') {
+            openAgentAction.delete();
+          }
+          openAgentAction = null;
         }
-        
-        // Clean up DOM event listeners
-        unregisterPanelEvents();
       }
     });
   } else {
